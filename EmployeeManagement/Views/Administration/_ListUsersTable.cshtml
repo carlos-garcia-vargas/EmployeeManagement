@@ -1,0 +1,40 @@
+﻿@model IEnumerable<ApplicationUser>
+@{
+    var usersmodel = Model.ToList();
+}
+<table class="table table-striped table-hover">
+    <thead class="thead-light">
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">User Name</th>
+            <th scope="col">City</th>
+            <th scope="col">Email Confirmed</th>
+            <th scope="col">Lockout End</th>
+            <th scope="col">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (var i = 0; i < usersmodel.Count; i++)
+        {
+            <tr>
+                <th scope="row">@(i + 1)</th>
+                <td>@usersmodel[i].UserName</td>
+                <td>@usersmodel[i].City</td>
+                <td>
+                    @usersmodel[i].EmailConfirmed
+                    @if (!usersmodel[i].EmailConfirmed)
+                    {
+                        <button class="btn btn-primary btn-sm w-25" data-toggle="modal" data-target="#confirmUnlockModal" data-url="@Url.Action("ConfirmEmail","Administration")" data-userid="@usersmodel[i].Id">
+                            <i class="fas fa-unlock-alt"></i>
+                        </button>
+                    }
+                </td>
+                <td>@usersmodel[i].LockoutEnd</td>
+                <td>
+                    <a asp-action="EditUser" asp-controller="Administration" asp-route-id="@usersmodel[i].Id" class="btn btn-primary">Edit</a>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#confirmDeleteModal" data-url="@Url.Action("DeleteUser","Administration",new { usersmodel[i].Id })">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
