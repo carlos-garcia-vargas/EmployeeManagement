@@ -1,0 +1,50 @@
+﻿@model IEnumerable<IdentityRole>
+@{
+    var rolesmodel = Model.ToList();
+}
+@using Microsoft.AspNetCore.Authorization
+
+@inject IAuthorizationService authorizationService
+<table class="table table-striped table-hover">
+    <thead class="thead-light">
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Id</th>
+            <th scope="col">Name</th>
+            <th scope="col">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (var i = 0; i < rolesmodel.Count; i++)
+        {
+            <tr>
+                <th scope="row">@(i + 1)</th>
+                <td>@rolesmodel[i].Id</td>
+                <td>@rolesmodel[i].Name</td>
+                <td>
+                    <form asp-action="DeleteRole" asp-route-id="@rolesmodel[i].Id" method="post">
+
+                        @if ((await authorizationService.AuthorizeAsync(User, "EditRolePolicy")).Succeeded)
+                        {
+                            <a class="btn btn-primary" asp-action="EditRole"
+                               asp-controller="Administration" asp-route-id="@rolesmodel[i].Id">
+                                Edit
+                            </a>
+                        }
+                        <span id="confirmDeleteSpan_@rolesmodel[i].Id" style="display:none;">
+                            <span>Are you sure you want to delete?</span>
+                            <button type="submit" class="btn btn-danger">Yes</button>
+                            <a href="#" class="btn btn-primary"
+                               onclick="confirmDelete('@rolesmodel[i].Id', false)">No</a>
+                        </span>
+
+                        <span id="deleteSpan_@rolesmodel[i].Id">
+                            <a href="#" class="btn btn-danger"
+                               onclick="confirmDelete('@rolesmodel[i].Id', true)">Delete</a>
+                        </span>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
