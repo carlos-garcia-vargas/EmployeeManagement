@@ -21,6 +21,14 @@
     <Compile Remove="Migrations\20190504065740_AddPhotoPathColumn.Designer.cs" />
     <Compile Remove="Migrations\20190626060140_Extend_IdentityUser.cs" />
     <Compile Remove="Migrations\20190626060140_Extend_IdentityUser.Designer.cs" />
+    <Compile Remove="Migrations\20200609223250_Catalogs.cs" />
+    <Compile Remove="Migrations\20200609223250_Catalogs.Designer.cs" />
+    <Compile Remove="Migrations\20200609231332_CatalogsDEtails.cs" />
+    <Compile Remove="Migrations\20200609231332_CatalogsDEtails.Designer.cs" />
+    <Compile Remove="Migrations\20200609233816_AddCatalogs.cs" />
+    <Compile Remove="Migrations\20200609233816_AddCatalogs.Designer.cs" />
+    <Compile Remove="Migrations\20200610213228_AddCatalogs.cs" />
+    <Compile Remove="Migrations\20200610213228_AddCatalogs.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

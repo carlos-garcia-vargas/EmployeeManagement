@@ -1,0 +1,19 @@
+﻿@model IEnumerable<EmployeeManagement.Models.Catalog>
+
+@{
+    ViewData["Title"] = "ListCatalogs";
+}
+
+<h1>Catalogs</h1>
+
+<button data-toggle="modal" data-target="#addCatalogModal" class="btn btn-primary mb-3" style="width:auto">Create New Catalog</button>
+
+<div id="list_catalog_table">
+    @Html.Partial("~/Views/Administration/_ListCatalogsTable.cshtml", Model)
+</div>
+@Html.Partial("~/Views/Administration/_addCatalogModal.cshtml",new CreateCatalogViewModel())
+@Html.Partial("~/Views/Administration/_confirmDeleteModal.cshtml")
+
+@section Scripts {
+    <script src="~/js/Administration/ListCatalogs.js"></script>
+}

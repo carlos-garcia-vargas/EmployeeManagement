@@ -4,9 +4,9 @@ using EmployeeManagement.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -20,14 +20,17 @@ namespace EmployeeManagement.Controllers
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly ILogger<AdministrationController> logger;
+        private readonly ICatalogRepository _catalogRepository;
 
         public AdministrationController(RoleManager<IdentityRole> roleManager,
                                         UserManager<ApplicationUser> userManager,
-                                        ILogger<AdministrationController> logger)
+                                        ILogger<AdministrationController> logger,
+                                        ICatalogRepository catalogRepository)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
             this.logger = logger;
+            _catalogRepository = catalogRepository;
         }
 
         [HttpGet]
@@ -522,5 +525,114 @@ namespace EmployeeManagement.Controllers
 
             return RedirectToAction("EditRole", new { Id = roleId });
         }
+
+        #region Catalogs
+        [HttpGet]
+        public async Task<IActionResult> ListCatalogs()
+        {            
+            var model = _catalogRepository.GetAllCatalogs();
+            bool isAjax = HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (isAjax)
+            {
+                string partialViewHtml = await this.RenderViewAsync("_ListCatalogsTable", model, true);
+                return Json(new { stringView = partialViewHtml });
+            }
+            return View(model);
+        }
+        [HttpGet]
+        public IActionResult CreateCatalog()
+        {
+            var model = new Catalog();
+            return View(model);
+        }
+        [HttpPost]
+        public IActionResult CreateCatalog(CreateCatalogViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                List<CatalogDetail> details =new List<CatalogDetail>();
+                if (model.ValueRows != null && model.ValueRows.Any())
+                {
+                    details = model.ValueRows.Select(s => new CatalogDetail { 
+                        CatalogValue = s.CatalogValue 
+                    }).ToList();
+                }
+                _catalogRepository.Add(new Catalog
+                {
+                    Name = model.CatalogName,
+                    CatalogDetails = details
+                });
+            }
+            return RedirectToAction("ListCatalogs");
+        }
+        [HttpGet]
+        public ViewResult EditCatalog(int id)
+        {
+            CreateCatalogViewModel model = new CreateCatalogViewModel(); 
+            var catalog =_catalogRepository.GetCatalog(id);
+            model.Id = catalog.Id;
+            model.CatalogName = catalog.Name;
+            model.CatalogValue = catalog.Value;
+            model.CatalogParentId = catalog.ParentId;
+            model.ValueRows = catalog.CatalogDetails.Select(s => new ValueRow { 
+                Id = s.Id,
+                CatalogValue = s.CatalogValue
+            }).ToList();
+            var catalogs = _catalogRepository.GetAllCatalogs().Where(w => w.Id != id).ToList();
+            model.CatalogsList = new SelectList(catalogs, "Id","Value",catalog.ParentId);
+            return View(model);
+        }
+        [HttpPost]
+        public IActionResult EditCatalog(CreateCatalogViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                Catalog catalog = _catalogRepository.GetCatalog(model.Id.Value);
+                catalog.Name = model.CatalogName;
+                catalog.Value = model.CatalogValue;
+                catalog.ParentId = model.CatalogParentId;
+                if (model.ValueRows != null && model.ValueRows.Any())
+                {
+                    catalog.CatalogDetails = model.ValueRows.Select(s => new CatalogDetail
+                    {
+                        CatalogValue = s.CatalogValue,
+                        CatalogId = model.Id.Value
+                    }).ToList();
+                }
+                _catalogRepository.Update(catalog);
+                return RedirectToAction("ListCatalogs");
+            }
+            return View();
+        }
+
+        [HttpPost]        
+        public IActionResult DeleteCatalog(int id)
+        {
+            var catalog = _catalogRepository.GetCatalog(id);
+            if (catalog == null)
+            {
+                ViewBag.ErrorMessage = $"catalog with Id = {id} cannot be found";
+                return View("NotFound");
+            }
+            else
+            {
+                try
+                {                    
+                    var result = _catalogRepository.Delete(id);
+                    return RedirectToAction("ListCatalogs");
+                }
+                catch (DbUpdateException ex)
+                {
+                    logger.LogError($"Error deleting role {ex}");
+
+                    ViewBag.ErrorTitle = $"{catalog.Name}  is in use";
+                    ViewBag.ErrorMessage = $"{catalog.Name}  cannot be deleted as there are data related to "; //+
+                        //$"in this role. If you want to delete this role, please remove the users from " +
+                        //$"the role and then try to delete";
+                    return View("Error");
+                }
+            }
+        }
+        #endregion Catalogs
     }
 }

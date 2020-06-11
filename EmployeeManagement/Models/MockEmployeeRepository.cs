@@ -36,6 +36,11 @@ namespace EmployeeManagement.Models
             return employee;
         }
 
+        public IEnumerable<Catalog> GetAllCatalogs()
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerable<Employee> GetAllEmployee()
         {
             return _employeeList;

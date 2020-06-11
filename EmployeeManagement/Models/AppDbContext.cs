@@ -14,6 +14,8 @@ namespace EmployeeManagement.Models
         { }
 
         public DbSet<Employee> Employees { get; set; }
+        public DbSet<Catalog> Catalogs { get; set; }
+        public DbSet<CatalogDetail> CatalogDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

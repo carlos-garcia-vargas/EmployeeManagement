@@ -96,7 +96,7 @@ namespace EmployeeManagement
             });
 
             services.AddScoped<IEmployeeRepository, SQLEmployeeRepository>();
-
+            services.AddScoped<ICatalogRepository, SQLCatalogRepository>();
             services.AddSingleton<IAuthorizationHandler, CanEditOnlyOtherAdminRolesAndClaimsHandler>();
             services.AddSingleton<IAuthorizationHandler, SuperAdminHandler>();
             services.AddSingleton<DataProtectionPurposeStrings>();
